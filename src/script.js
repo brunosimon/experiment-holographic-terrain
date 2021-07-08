@@ -225,6 +225,7 @@ terrain.uniforms = {
     uHslHue: { value: 1.0 },
     uHslHueOffset: { value: 0.0 },
     uHslHueFrequency: { value: 10.0 },
+    uHslTimeFrequency: { value: 0.05 },
     uHslLightness: { value: 0.75 },
     uHslLightnessVariation: { value: 0.25 },
     uHslLightnessFrequency: { value: 20.0 }
@@ -296,6 +297,17 @@ gui
         min: 0,
         max: 50,
         step: 0.01
+    })
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uHslTimeFrequency,
+        property: 'value',
+        type: 'range',
+        label: 'uHslTimeFrequency',
+        min: 0,
+        max: 0.2,
+        step: 0.001
     })
     
 gui
