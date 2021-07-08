@@ -1,4 +1,3 @@
-
 uniform float uTime;
 
 varying float vElevation;
