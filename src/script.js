@@ -29,7 +29,7 @@ const gui = new Guify({
     barMode: 'none'
 })
 const guiDummy = {}
-guiDummy.clearColor = '#141d29'
+guiDummy.clearColor = '#080024'
 
 /**
  * Sizes
@@ -435,7 +435,7 @@ const bokehPass = new BokehPass(
     camera,
     {
         focus: 1.0,
-        aperture: 0.025,
+        aperture: 0.015,
         maxblur: 0.01,
 
         width: sizes.width * sizes.pixelRatio,
