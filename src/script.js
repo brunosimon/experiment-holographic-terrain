@@ -25,7 +25,7 @@ const scene = new THREE.Scene()
 const gui = new Guify({
     align: 'right',
     theme: 'dark',
-    // width: '300',
+    width: '300',
     barMode: 'none'
 })
 const guiDummy = {}
@@ -71,7 +71,7 @@ window.addEventListener('resize', () =>
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 1
 camera.position.y = 1
-camera.position.z = 1
+camera.position.z = 0
 scene.add(camera)
 
 // Controls
@@ -220,7 +220,14 @@ terrain.geometry.rotateX(- Math.PI * 0.5)
 terrain.uniforms = {
     uTexture: { value: terrain.texture.instance },
     uElevation: { value: 2 },
+    uElevationValley: { value: 0.4 },
+    uElevationValleyFrequency: { value: 1.5 },
+    uElevationGeneral: { value: 0.2 },
+    uElevationGeneralFrequency: { value: 0.2 },
+    uElevationDetails: { value: 0.2 },
+    uElevationDetailsFrequency: { value: 2.012 },
     uTextureFrequency: { value: 10 },
+    uTextureOffset: { value: 0.585 },
     uTime: { value: 0 },
     uHslHue: { value: 1.0 },
     uHslHueOffset: { value: 0.0 },
@@ -254,6 +261,78 @@ gui
 gui
     .Register({
         folder: 'terrainMaterial',
+        object: terrain.uniforms.uElevationValley,
+        property: 'value',
+        type: 'range',
+        label: 'uElevationValley',
+        min: 0,
+        max: 1,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uElevationValleyFrequency,
+        property: 'value',
+        type: 'range',
+        label: 'uElevationValleyFrequency',
+        min: 0,
+        max: 10,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uElevationGeneral,
+        property: 'value',
+        type: 'range',
+        label: 'uElevationGeneral',
+        min: 0,
+        max: 1,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uElevationGeneralFrequency,
+        property: 'value',
+        type: 'range',
+        label: 'uElevationGeneralFrequency',
+        min: 0,
+        max: 10,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uElevationDetails,
+        property: 'value',
+        type: 'range',
+        label: 'uElevationDetails',
+        min: 0,
+        max: 1,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uElevationDetailsFrequency,
+        property: 'value',
+        type: 'range',
+        label: 'uElevationDetailsFrequency',
+        min: 0,
+        max: 10,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
         object: terrain.uniforms.uTextureFrequency,
         property: 'value',
         type: 'range',
@@ -261,6 +340,18 @@ gui
         min: 0.01,
         max: 50,
         step: 0.01
+    })
+
+gui
+    .Register({
+        folder: 'terrainMaterial',
+        object: terrain.uniforms.uTextureOffset,
+        property: 'value',
+        type: 'range',
+        label: 'uTextureOffset',
+        min: 0,
+        max: 1,
+        step: 0.001
     })
 
 gui

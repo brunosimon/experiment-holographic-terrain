@@ -1,6 +1,7 @@
 uniform sampler2D uTexture;
 uniform float uTime;
 uniform float uTextureFrequency;
+uniform float uTextureOffset;
 uniform float uHslHue;
 uniform float uHslHueOffset;
 uniform float uHslHueFrequency;
@@ -34,7 +35,7 @@ void main()
     vec3 uColor = vec3(1.0, 1.0, 1.0);
 
     vec3 rainbowColor = getRainbowColor();
-    vec4 textureColor = texture2D(uTexture, vec2(0.0, vElevation * uTextureFrequency));
+    vec4 textureColor = texture2D(uTexture, vec2(0.0, vElevation * uTextureFrequency + uTextureOffset));
 
     vec3 color = mix(uColor, rainbowColor, textureColor.r);
 
@@ -45,5 +46,4 @@ void main()
     );
 
     gl_FragColor = vec4(color, textureColor.a * sideAlpha);
-    // gl_FragColor = vec4(vec3(sideAlpha), 1.0);
 }
