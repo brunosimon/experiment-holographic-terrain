@@ -9,6 +9,8 @@ import terrainVertexShader from './shaders/terrain/vertex.glsl'
 import terrainFragmentShader from './shaders/terrain/fragment.glsl'
 import terrainDepthVertexShader from './shaders/terrainDepth/vertex.glsl'
 import terrainDepthFragmentShader from './shaders/terrainDepth/fragment.glsl'
+import vignetteVertexShader from './shaders/vignette/vertex.glsl'
+import vignetteFragmentShader from './shaders/vignette/fragment.glsl'
 
 /**
  * Base
@@ -25,7 +27,7 @@ const scene = new THREE.Scene()
 const gui = new Guify({
     align: 'right',
     theme: 'dark',
-    width: '300',
+    width: '300px',
     barMode: 'none'
 })
 const guiDummy = {}
@@ -85,18 +87,19 @@ gui
     .Register({
         type: 'folder',
         label: 'terrain',
-        open: true
+        open: false
     })
 
 const terrain = {}
 
 // Texture
 terrain.texture = {}
+terrain.texture.visible = false
 terrain.texture.linesCount = 5
 terrain.texture.bigLineWidth = 0.08
 terrain.texture.smallLineWidth = 0.01
 terrain.texture.smallLineAlpha = 0.5
-terrain.texture.width = 32
+terrain.texture.width = 1
 terrain.texture.height = 128
 terrain.texture.canvas = document.createElement('canvas')
 terrain.texture.canvas.width = terrain.texture.width
@@ -104,8 +107,14 @@ terrain.texture.canvas.height = terrain.texture.height
 terrain.texture.canvas.style.position = 'fixed'
 terrain.texture.canvas.style.top = 0
 terrain.texture.canvas.style.left = 0
+terrain.texture.canvas.style.width = '50px'
+terrain.texture.canvas.style.height = `${terrain.texture.height}px`
 terrain.texture.canvas.style.zIndex = 1
-document.body.append(terrain.texture.canvas)
+
+if(terrain.texture.visible)
+{
+    document.body.append(terrain.texture.canvas)
+}
 
 terrain.texture.context = terrain.texture.canvas.getContext('2d')
 
@@ -160,6 +169,26 @@ gui
         open: true
     })
     
+gui
+    .Register({
+        folder: 'terrainTexture',
+        object: terrain.texture,
+        property: 'visible',
+        type: 'checkbox',
+        label: 'visible',
+        onChange: () =>
+        {
+            if(terrain.texture.visible)
+            {
+                document.body.append(terrain.texture.canvas)
+            }
+            else
+            {
+                document.body.removeChild(terrain.texture.canvas)
+            }
+        }
+    })
+
 gui
     .Register({
         folder: 'terrainTexture',
@@ -470,6 +499,79 @@ terrain.mesh = new THREE.Mesh(terrain.geometry, terrain.material)
 terrain.mesh.scale.set(10, 10, 10)
 terrain.mesh.userData.depthMaterial = terrain.depthMaterial
 scene.add(terrain.mesh)
+
+/**
+ * Vignette
+ */
+const vignette = {}
+
+vignette.color = {}
+vignette.color.value = '#6800ff'
+vignette.color.instance = new THREE.Color(vignette.color.value)
+
+vignette.geometry = new THREE.PlaneGeometry(2, 2)
+
+vignette.material = new THREE.ShaderMaterial({
+    uniforms:
+    {
+        uColor: { value: vignette.color.instance },
+        uMultiplier: { value: 1.16 },
+        uOffset: { value: - 0.165 }
+    },
+    vertexShader: vignetteVertexShader,
+    fragmentShader: vignetteFragmentShader,
+    transparent: true,
+    depthTest: false
+})
+vignette.mesh = new THREE.Mesh(vignette.geometry, vignette.material)
+vignette.mesh.userData.noBokeh = true
+vignette.mesh.frustumCulled = false
+scene.add(vignette.mesh)
+
+gui
+    .Register({
+        type: 'folder',
+        label: 'vignette',
+        open: true
+    })
+
+gui
+    .Register({
+        folder: 'vignette',
+        object: vignette.color,
+        property: 'value',
+        type: 'color',
+        label: 'color',
+        format: 'hex',
+        onChange: () =>
+        {
+            vignette.color.instance.set(vignette.color.value)
+        }
+    })
+
+gui
+    .Register({
+        folder: 'vignette',
+        object: vignette.material.uniforms.uMultiplier,
+        property: 'value',
+        type: 'range',
+        label: 'uMultiplier',
+        min: 0,
+        max: 5,
+        step: 0.001
+    })
+
+gui
+    .Register({
+        folder: 'vignette',
+        object: vignette.material.uniforms.uOffset,
+        property: 'value',
+        type: 'range',
+        label: 'uOffset',
+        min: - 2,
+        max: 2,
+        step: 0.001
+    })
 
 /**
  * Renderer
