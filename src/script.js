@@ -6,6 +6,7 @@ import Guify from 'guify'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { BokehPass } from './Passes/BokehPass.js'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 import terrainVertexShader from './shaders/terrain/vertex.glsl'
 import terrainFragmentShader from './shaders/terrain/fragment.glsl'
 import terrainDepthVertexShader from './shaders/terrainDepth/vertex.glsl'
@@ -713,7 +714,7 @@ gui
         object: bokehPass,
         property: 'enabled',
         type: 'checkbox',
-        label: 'enabled'
+        label: 'bokehPass'
     })
     
 gui
@@ -751,6 +752,64 @@ gui
         max: 0.02,
         step: 0.0001
     })
+
+// Unreal bloom pass
+const unrealBloomPass = new UnrealBloomPass(new THREE.Vector2(sizes.width, sizes.height), 1.5, 0.4, 0.85)
+unrealBloomPass.enabled = false
+effectComposer.addPass(unrealBloomPass)
+
+gui
+    .Register({
+        type: 'folder',
+        label: 'unrealBloomPass',
+        open: true
+    })
+
+gui
+    .Register({
+        folder: 'unrealBloomPass',
+        object: unrealBloomPass,
+        property: 'enabled',
+        type: 'checkbox',
+        label: 'unrealBloomPass'
+    })
+
+gui
+    .Register({
+        folder: 'unrealBloomPass',
+        object: unrealBloomPass,
+        property: 'threshold',
+        type: 'range',
+        label: 'threshold',
+        min: 0,
+        max: 1,
+        step: 0.0001
+    })
+
+gui
+    .Register({
+        folder: 'unrealBloomPass',
+        object: unrealBloomPass,
+        property: 'strength',
+        type: 'range',
+        label: 'strength',
+        min: 0,
+        max: 3,
+        step: 0.0001
+    })
+
+gui
+    .Register({
+        folder: 'unrealBloomPass',
+        object: unrealBloomPass,
+        property: 'radius',
+        type: 'range',
+        label: 'radius',
+        min: 0,
+        max: 1,
+        step: 0.0001
+    })
+
 
 /**
  * View
@@ -854,7 +913,7 @@ window.setInterval(() =>
     view.change((view.index + 1) % view.settings.length)
 }, 7500)
 
-gui 
+gui
     .Register({
         type: 'folder',
         label: 'view',
