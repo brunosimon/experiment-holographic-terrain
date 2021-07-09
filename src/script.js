@@ -50,8 +50,8 @@ window.addEventListener('resize', () =>
     sizes.pixelRatio = Math.min(window.devicePixelRatio, 2)
 
     // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
+    camera.instance.aspect = sizes.width / sizes.height
+    camera.instance.updateProjectionMatrix()
 
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
@@ -69,19 +69,36 @@ window.addEventListener('resize', () =>
 /**
  * Camera
  */
-// Base camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+const camera = {}
+camera.position = new THREE.Vector3()
+camera.rotation = new THREE.Euler()
 camera.rotation.reorder('YXZ')
-camera.position.x = 1
-camera.position.y = 1
-camera.position.z = 0
-scene.add(camera)
 
-window.camera = camera
+// Base camera
+camera.instance = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.instance.rotation.reorder('YXZ')
+scene.add(camera.instance)
 
 // Orbit controls
-const orbitControls = new OrbitControls(camera, canvas)
+const orbitControls = new OrbitControls(camera.instance, canvas)
+orbitControls.enabled = false
 orbitControls.enableDamping = true
+
+gui
+    .Register({
+        type: 'folder',
+        label: 'camera',
+        open: false
+    })
+
+gui
+    .Register({
+        folder: 'camera',
+        object: orbitControls,
+        property: 'enabled',
+        type: 'checkbox',
+        label: 'orbitControls.enabled'
+    })
 
 /**
  * Terrain
@@ -622,13 +639,13 @@ effectComposer.setSize(sizes.width, sizes.height)
 effectComposer.setPixelRatio(sizes.pixelRatio)
 
 // Render pass
-const renderPass = new RenderPass(scene, camera)
+const renderPass = new RenderPass(scene, camera.instance)
 effectComposer.addPass(renderPass)
 
 // Bokeh pass
 const bokehPass = new BokehPass(
     scene,
-    camera,
+    camera.instance,
     {
         focus: 1.0,
         aperture: 0.015,
@@ -702,25 +719,46 @@ view.settings = [
     {
         position: { x: 0, y: 2.124, z: - 0.172 },
         rotation: { x: -1.489, y: - Math.PI, z: 0 },
-        focus: 2.14
+        focus: 2.14,
+        parallaxMultiplier: 0.25
     },
     {
         position: { x: 1, y: 1.1, z: 0 },
         rotation: { x: -0.833, y: 1.596, z: 1.651 },
-        focus: 1.1
+        focus: 1.1,
+        parallaxMultiplier: 0.12
     },
     {
         position: { x: 1, y: 0.87, z: - 0.97 },
         rotation: { x: - 0.638, y: 2.33, z: 0 },
-        focus: 1.36
+        focus: 1.36,
+        parallaxMultiplier: 0.12
     },
     {
         position: { x: -1.43, y: 0.33, z: -0.144 },
         rotation: { x: -0.312, y: -1.67, z: 0 },
-        focus: 1.25
+        focus: 1.25,
+        parallaxMultiplier: 0.12
     }
 ]
 
+// Parallax
+view.parallax = {}
+view.parallax.target = {}
+view.parallax.target.x = 0
+view.parallax.target.y = 0
+view.parallax.eased = {}
+view.parallax.eased.x = 0
+view.parallax.eased.y = 0
+view.parallax.eased.multiplier = 4
+
+window.addEventListener('mousemove', (_event) =>
+{
+    view.parallax.target.x = (_event.clientX / sizes.width - 0.5) * view.parallax.multiplier
+    view.parallax.target.y = - (_event.clientY / sizes.height - 0.5) * view.parallax.multiplier
+})
+
+// Change
 view.change = (_index) =>
 {
     const viewSetting = view.settings[_index]
@@ -730,6 +768,8 @@ view.change = (_index) =>
     camera.rotation.y = viewSetting.rotation.y
 
     bokehPass.materialBokeh.uniforms.focus.value = viewSetting.focus
+
+    view.parallax.multiplier = viewSetting.parallaxMultiplier
 }
 
 view.change(0)
@@ -770,10 +810,24 @@ const tick = () =>
     terrain.uniforms.uTime.value = elapsedTime
 
     // Update controls
-    orbitControls.update()
+    if(orbitControls.enabled)
+    {
+        orbitControls.update()
+    }
+
+    // Camera
+    camera.instance.position.copy(camera.position)
+
+    view.parallax.eased.x += (view.parallax.target.x - view.parallax.eased.x) * deltaTime * view.parallax.eased.multiplier
+    view.parallax.eased.y += (view.parallax.target.y - view.parallax.eased.y) * deltaTime * view.parallax.eased.multiplier
+    camera.instance.translateX(view.parallax.eased.x)
+    camera.instance.translateY(view.parallax.eased.y)
+
+    camera.instance.rotation.x = camera.rotation.x
+    camera.instance.rotation.y = camera.rotation.y
 
     // Render
-    // renderer.render(scene, camera)
+    // renderer.render(scene, camera.instance)
     effectComposer.render()
 
     // Call tick again on the next frame
