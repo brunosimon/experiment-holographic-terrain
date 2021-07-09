@@ -851,7 +851,7 @@ view.apply()
 
 window.setInterval(() =>
 {
-    view.change(view.index + 1)
+    view.change((view.index + 1) % view.settings.length)
 }, 7500)
 
 gui 
