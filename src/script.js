@@ -1,4 +1,5 @@
 import './style.css'
+import gsap from 'gsap'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import Guify from 'guify'
@@ -741,6 +742,7 @@ view.settings = [
         parallaxMultiplier: 0.12
     }
 ]
+view.current = null
 
 // Parallax
 view.parallax = {}
@@ -763,13 +765,19 @@ view.change = (_index) =>
 {
     const viewSetting = view.settings[_index]
 
+    // Camera
     camera.position.copy(viewSetting.position)
     camera.rotation.x = viewSetting.rotation.x
     camera.rotation.y = viewSetting.rotation.y
 
+    // Bokeh
     bokehPass.materialBokeh.uniforms.focus.value = viewSetting.focus
 
+    // Parallax
     view.parallax.multiplier = viewSetting.parallaxMultiplier
+
+    // Save
+    view.current = viewSetting
 }
 
 view.change(0)
@@ -793,6 +801,23 @@ for(const _settingIndex in view.settings)
             }
         })    
 }
+
+// Focus animation
+const changeFocus = () =>
+{
+    gsap.to(
+        bokehPass.materialBokeh.uniforms.focus,
+        {
+            duration: 0.5 + Math.random() * 3,
+            delay: 0.5 + Math.random() * 1,
+            ease: 'power2.inOut',
+            onComplete: changeFocus,
+            value: view.current.focus + Math.random() - 0.2
+        }
+    )
+}
+
+changeFocus()
 
 /**
  * Animate
