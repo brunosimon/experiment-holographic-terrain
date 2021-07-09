@@ -24,6 +24,7 @@ html,
 body
 {
     overflow: hidden;
+    background: #130621;
 }
 
 .webgl
