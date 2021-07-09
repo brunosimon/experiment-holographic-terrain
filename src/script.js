@@ -530,7 +530,7 @@ scene.add(terrain.mesh)
 const overlay = {}
 
 overlay.vignetteColor = {}
-overlay.vignetteColor.value = '#6800ff'
+overlay.vignetteColor.value = '#4f1f96'
 overlay.vignetteColor.instance = new THREE.Color(overlay.vignetteColor.value)
 
 overlay.overlayColor = {}
@@ -925,12 +925,13 @@ for(const _settingIndex in view.settings)
     gui
         .Register({
             type: 'button',
+            folder: 'view',
             label: `change(${_settingIndex})`,
             action: () =>
             {
                 view.change(_settingIndex)
             }
-        })    
+        })
 }
 
 // Focus animation
@@ -949,6 +950,76 @@ const changeFocus = () =>
 }
 
 changeFocus()
+
+/**
+ * Presets
+ */
+const presets = {}
+presets.settings = [
+    {
+        vignetteColor: '#4f1f96',
+        overlayColor: '#130621',
+        clearColor: '#080024',
+        terrainHue: 1,
+        terrainHueOffset: 0
+    },
+    {
+        vignetteColor: '#590826',
+        overlayColor: '#21060b',
+        clearColor: '#240004',
+        terrainHue: 0.145,
+        terrainHueOffset: 0.86
+    },
+    {
+        vignetteColor: '#1f6a96',
+        overlayColor: '#050e1c',
+        clearColor: '#000324',
+        terrainHue: 0.12,
+        terrainHueOffset: 0.5
+    },
+    {
+        vignetteColor: '#1f9682',
+        overlayColor: '#02100c',
+        clearColor: '#00240c',
+        terrainHue: 0.12,
+        terrainHueOffset: 0.2
+    }
+]
+
+presets.apply = (_index) =>
+{
+    const presetsSettings = presets.settings[_index]
+
+    overlay.vignetteColor.instance.set(presetsSettings.vignetteColor)
+
+    overlay.overlayColor.instance.set(presetsSettings.overlayColor)
+
+    terrain.uniforms.uHslHue.value = presetsSettings.terrainHue
+    terrain.uniforms.uHslHueOffset.value = presetsSettings.terrainHueOffset
+
+    renderer.setClearColor(presetsSettings.clearColor, 1)
+}
+
+gui
+    .Register({
+        type: 'folder',
+        label: 'presets',
+        open: true
+    })
+
+for(const _presetsIndex in presets.settings)
+{
+    gui
+        .Register({
+            type: 'button',
+            folder: 'presets',
+            label: `apply(${_presetsIndex})`,
+            action: () =>
+            {
+                presets.apply(_presetsIndex)
+            }
+        })
+}
 
 /**
  * Animate
